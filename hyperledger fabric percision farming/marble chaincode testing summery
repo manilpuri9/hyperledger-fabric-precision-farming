@@ -1,0 +1,205 @@
+Using dev-mode(special network just for development process) to test chaincode.
+
+
+Normally chaincodes are started and maintained by peer. 
+However in “dev mode", chaincode is built and started by the user. 
+This mode is useful during chaincode development phase for rapid code/build/run/debug cycle turnaround.
+We start "dev mode" by leveraging pre-generated orderer and channel artifacts for a sample dev network.
+As such, the user can immediately jump into the process of compiling chaincode and driving calls.
+
+steps:
+Install Fabric Samples in local machine(clone the fabric-Samples).
+https://github.com/hyperledger/fabric-samples/
+
+Navigate to the chaincode-docker-devmode directory of the fabric-samples clone:
+cd chaincode-docker-devmode
+
+Download docker images
+We need four docker images in order for "dev mode" to run against the supplied docker compose script. 
+If you installed the fabric-samples repo clone and followed the instructions to :ref:`download-platform-specific-binaries`, 
+then you should have the necessary Docker images installed locally.
+
+if you dont have latest images, change the tags to specific version in the yaml file of docker
+we used :x86_64-1.0.0 tag 
+
+kill all the pre running docker containers:
+docker rm $(docker ps -aq)
+
+open 3 terminals:
+------------------------
+Terminal 1 - Start the network
+...................................
+docker-compose -f docker-compose-simple.yaml up
+
+The above starts the network with the SingleSampleMSPSolo orderer profile and launches the peer in "dev mode".
+ It also launches two additional containers - one for the chaincode environment and a CLI to interact with the chaincode.
+  The commands for create and join channel are embedded in the CLI container, 
+  so we can jump immediately to the chaincode calls.
+
+
+
+Terminal 2 - Build & start the chaincode
+..........................................
+
+docker exec -it chaincode bash
+
+docker container terminal is logged in like this:
+root@d2629980e76b:/opt/gopath/src/chaincode#
+
+go to specific chaincode that is to be tested and ran:
+in our case marble chaincode:
+root@96ccf4042777:/opt# cd gopath/src/chaincode
+root@96ccf4042777:/opt/gopath/src/chaincode# ls
+chaincode_example02  fabcar  hyperledger  marbles02  sacc
+root@96ccf4042777:/opt/gopath/src/chaincode# cd marbles02/
+root@96ccf4042777:/opt/gopath/src/chaincode/marbles02# ls
+marbles_chaincode.go
+
+build the chaincode with go build:
+go build
+
+Assuming there are no errors Now run the chaincode:
+// root@96ccf4042777:/opt/gopath/src/chaincode/marbles02# 
+CORE_PEER_ADDRESS=peer:7051 CORE_CHAINCODE_ID_NAME=mycc:0 ./marbles02 
+
+chaincode id name is mycc
+
+now the chaincode runs:
+root@96ccf4042777:/opt/gopath/src/chaincode/marbles02# CORE_PEER_ADDRESS=peer:7051 CORE_CHAINCODE_ID_NAME=mycc:0 ./marbles02          
+2018-03-02 09:00:31.328 UTC [shim] SetupChaincodeLogging -> INFO 001 Chaincode log level not provided; defaulting to: INFO
+2018-03-02 09:00:31.328 UTC [shim] SetupChaincodeLogging -> INFO 002 Chaincode (build level: ) starting up ...
+
+The chaincode is started with peer and chaincode logs indicating successful registration with the peer.
+Note that at this stage the chaincode is not associated with any channel.
+This is done in subsequent steps using the instantiate command.
+
+
+Terminal 3 - Use the chaincode
+.....................................
+
+Even though you are in --peer-chaincodedev mode, 
+you still have to install the chaincode so the life-cycle system chaincode can go through its checks normally. 
+This requirement may be removed in future when in --peer-chaincodedev mode.
+
+We'll leverage the CLI container to drive these calls.
+
+docker exec -it cli bash
+
+in our case:
+manilpuri9@manilpuri9:~$ docker exec -it cli bash
+
+you will see something like this:
+root@b8389c0c41b3:/opt/gopath/src/chaincodedev#
+
+this is our cli to interact with our network
+
+NOw we install the chaincode that build previously in terminal 2 like this:
+//  root@b8389c0c41b3:/opt/gopath/src/chaincodedev# 
+
+peer chaincode install -p chaincodedev/chaincode/marbles02 -n mycc -v 0
+
+you will see something like this:
+
+2018-03-02 09:02:37.799 UTC [msp] GetLocalMSP -> DEBU 001 Returning existing local MSP
+2018-03-02 09:02:37.799 UTC [msp] GetDefaultSigningIdentity -> DEBU 002 Obtaining default signing identity
+2018-03-02 09:02:37.799 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 003 Using default escc
+2018-03-02 09:02:37.799 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 004 Using default vscc
+2018-03-02 09:02:37.887 UTC [golang-platform] getCodeFromFS -> DEBU 005 getCodeFromFS chaincodedev/chaincode/marbles02
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 006 Discarding GOROOT package bytes
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 007 Discarding GOROOT package encoding/json
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 008 Discarding GOROOT package fmt
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 009 Discarding provided package github.com/hyperledger/fabric/core/chaincode/shim
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 00a Discarding provided package github.com/hyperledger/fabric/protos/peer
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 00b Discarding GOROOT package strconv
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 00c Discarding GOROOT package strings
+2018-03-02 09:02:38.091 UTC [golang-platform] func1 -> DEBU 00d Discarding GOROOT package time
+2018-03-02 09:02:38.091 UTC [golang-platform] GetDeploymentPayload -> DEBU 00e done
+2018-03-02 09:02:38.095 UTC [msp/identity] Sign -> DEBU 00f Sign: plaintext: 0AA3080A5B08031A0B08AEA6E4D40510...FEF37F010000FFFFE0D67BE600680000 
+2018-03-02 09:02:38.095 UTC [msp/identity] Sign -> DEBU 010 Sign: digest: 04E8D2AACE33F33F932A7E00904CA06CD970556B7B548E8EDAC3C461873E177E 
+2018-03-02 09:02:38.100 UTC [chaincodeCmd] install -> DEBU 011 Installed remotely response:<status:200 payload:"OK" > 
+2018-03-02 09:02:38.100 UTC [main] main -> INFO 012 Exiting.....
+root@b8389c0c41b3:/opt/gopath/src/chaincodedev#
+
+Now you instantiate the chaincode with following command
+root@b8389c0c41b3:/opt/gopath/src/chaincodedev#
+
+peer chaincode instantiate -n mycc -v 0 -c '{"Args":["initMarble","marble1","blue","35","tom"]}' -C myc
+
+we see something like this:
+2018-03-02 09:36:05.395 UTC [msp] GetLocalMSP -> DEBU 001 Returning existing local MSP
+2018-03-02 09:36:05.395 UTC [msp] GetDefaultSigningIdentity -> DEBU 002 Obtaining default signing identity
+2018-03-02 09:36:05.396 UTC [msp/identity] Sign -> DEBU 003 Sign: plaintext: 0AA4080A5C08011A0C0885B6E4D40510...436F6E666967426C6F636B0A036D7963 
+2018-03-02 09:36:05.396 UTC [msp/identity] Sign -> DEBU 004 Sign: digest: 9AB75F609CABA2709339C0E75D424205C7B9D3D698AE92A10FD63BEB38FF9D1E 
+2018-03-02 09:36:05.401 UTC [common/config] NewStandardValues -> DEBU 005 Initializing protos for *config.ChannelProtos
+2018-03-02 09:36:05.401 UTC [common/config] initializeProtosStruct -> DEBU 006 Processing field: HashingAlgorithm
+2018-03-02 09:36:05.401 UTC [common/config] initializeProtosStruct -> DEBU 007 Processing field: BlockDataHashingStructure
+2018-03-02 09:36:05.401 UTC [common/config] initializeProtosStruct -> DEBU 008 Processing field: OrdererAddresses
+2018-03-02 09:36:05.401 UTC [common/config] initializeProtosStruct -> DEBU 009 Processing field: Consortium
+....
+....
+2018-03-02 09:36:05.411 UTC [chaincodeCmd] InitCmdFactory -> INFO 0a0 Get chain(myc) orderer endpoint: orderer:7050
+2018-03-02 09:36:05.413 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 0a1 Using default escc
+2018-03-02 09:36:05.413 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 0a2 Using default vscc
+2018-03-02 09:36:05.413 UTC [msp/identity] Sign -> DEBU 0a3 Sign: plaintext: 0AA9080A6108031A0C0885B6E4D40510...6F6D0A000A04657363630A0476736363 
+2018-03-02 09:36:05.413 UTC [msp/identity] Sign -> DEBU 0a4 Sign: digest: 601038B2EF75E4691DE2093395BDCB55EFB28B5C3653BFF0B668DEB7D1A47D3E 
+2018-03-02 09:36:05.425 UTC [msp/identity] Sign -> DEBU 0a5 Sign: plaintext: 0AA9080A6108031A0C0885B6E4D40510...0D002BF12BF5EC1D33F7E61790421D43 
+2018-03-02 09:36:05.425 UTC [msp/identity] Sign -> DEBU 0a6 Sign: digest: DE194FDFD75D6C74C0D478F302663C73223BCDB6908356CCEEB04C31E72A2627 
+2018-03-02 09:36:05.430 UTC [main] main -> INFO 0a7 Exiting.....
+
+here all the certificate checks and policy are verified.
+
+now we invoke the chaincode that is instanciated:
+//  root@b8389c0c41b3:/opt/gopath/src/chaincodedev# 
+peer chaincode invoke -n mycc -c '{"Args":["initMarble","marble2","red","50","tom"]}' -C myc
+
+we see something like this:
+
+2018-03-02 09:41:07.515 UTC [msp] GetLocalMSP -> DEBU 001 Returning existing local MSP
+2018-03-02 09:41:07.515 UTC [msp] GetDefaultSigningIdentity -> DEBU 002 Obtaining default signing identity
+2018-03-02 09:41:07.515 UTC [msp/identity] Sign -> DEBU 003 Sign: plaintext: 0AA4080A5C08011A0C08B3B8E4D40510...436F6E666967426C6F636B0A036D7963 
+...
+...
+\naXzB/jnlU39B7Wws9BIr9c8mSOEPF6VY1uGP+dKV0g==\n-----END -----\n" signature:"0D\002 \0139\235\\j\0230\364\243\213\303\3165\3455=z1\327y\227BEk\200\353\004\3577\017\021;\002 F\233l\222z\221d\323\031\325\305\t\3573\006fr\026\234\257\200<\320IIO~XM\346\240u" > 
+2018-03-02 09:41:07.553 UTC [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 0a8 Chaincode invoke successful. result: status:200 
+2018-03-02 09:41:07.553 UTC [main] main -> INFO 0a9 Exiting.....
+
+we can query the chaincode now which is invoked and added tho the BlockDataHashingStructure:
+//  root@b8389c0c41b3:/opt/gopath/src/chaincodedev# 
+peer chaincode query -n mycc -c '{"Args":["readMarble","marble1"]}' -C myc
+
+here we will se the error message since we havent invoked the chaincode with marble1:
+.................................
+2018-03-02 09:43:12.630 UTC [msp] GetLocalMSP -> DEBU 001 Returning existing local MSP
+2018-03-02 09:43:12.631 UTC [msp] GetDefaultSigningIdentity -> DEBU 002 Obtaining default signing identity
+2018-03-02 09:43:12.631 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 003 Using default escc
+2018-03-02 09:43:12.631 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 004 Using default vscc
+2018-03-02 09:43:12.631 UTC [msp/identity] Sign -> DEBU 005 Sign: plaintext: 0AA9080A6108031A0C08B0B9E4D40510...644D6172626C650A076D6172626C6531 
+2018-03-02 09:43:12.631 UTC [msp/identity] Sign -> DEBU 006 Sign: digest: 9CFD42A0BB40B9E0D4E11013AA51B33026D1BC38B2CA81B11D5535A967796B68 
+
+Error: Error endorsing query: rpc error: code = Unknown desc = chaincode error (status: 500, message: {"Error":"Marble does not exist: marble1"}) - <nil>
+
+running query again with marble2:
+//root@b8389c0c41b3:/opt/gopath/src/chaincodedev# 
+peer chaincode query -n mycc -c '{"Args":["readMarble","marble2"]}' -C myc
+
+result:
+018-03-02 09:43:49.455 UTC [msp] GetLocalMSP -> DEBU 001 Returning existing local MSP
+2018-03-02 09:43:49.455 UTC [msp] GetDefaultSigningIdentity -> DEBU 002 Obtaining default signing identity
+2018-03-02 09:43:49.455 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 003 Using default escc
+2018-03-02 09:43:49.455 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 004 Using default vscc
+2018-03-02 09:43:49.455 UTC [msp/identity] Sign -> DEBU 005 Sign: plaintext: 0AA9080A6108031A0C08D5B9E4D40510...644D6172626C650A076D6172626C6532 
+2018-03-02 09:43:49.455 UTC [msp/identity] Sign -> DEBU 006 Sign: digest: 69D1191C62CE9B562E84D0F4088B847BF7FC9FC13FD89DCEBB89C93448B1F126 
+
+Query Result: {"docType":"marble","name":"marble2","color":"red","size":50,"owner":"tom"}
+2018-03-02 09:43:49.466 UTC [main] main -> INFO 007 Exiting.....
+
+marble2 exist in our blockchain and its data is seen sa query result:
+Query Result: {"docType":"marble","name":"marble2","color":"red","size":50,"owner":"tom"}
+
+
+
+
+
+
+
+
