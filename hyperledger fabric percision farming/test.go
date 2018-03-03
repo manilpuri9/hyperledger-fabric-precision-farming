@@ -9,8 +9,8 @@ type Crop struct {
 	Quantity int    `json:"quantity"`
 	FarmInfo struct {
 		GeoLocation struct {
-			Latitude  []interface{} `json:"latitude"`
-			Longitude []interface{} `json:"longitude"`
+			Latitude  float64 `json:"latitude"`
+			Longitude float64 `json:"longitude"`
 		} `json:"geo_location"`
 		SoilType string `json:"soil_type"`
 	} `json:"farm_info"`
@@ -52,6 +52,51 @@ func f1()
 
 func main() {
 	fmt.Println("hello world")
-	Crop{Name: "rice", Owner: "manil puri"}
+	cropJson := Crop{
+		Name:     "rice",
+		Owner:    "manil puri",
+		Quantity: 400,
+		FarmInfo: {
+			GeoLocation: {
+				Latitude:  43.2,
+				Longitude: 21.3,
+			},
+			SoilType: "clay",
+		},
+		Weather: {
+			Temperature: {
+				Celcius: 34,
+			},
+			Pressure: {
+				Pascal: 4,
+			},
+			Humidity: {
+				CubicMeter: 434,
+			},
+			Radiation: {
+				Rem: 10.3,
+			},
+		},
+		SoilCondition: {
+			Moisture: {
+				CubicMeter: 32,
+			},
+			Ph: 3,
+			Nitrogen: {
+				Percentage: 1.2,
+			},
+			Phosphorus: {
+				Percentage: 3.4,
+			},
+		},
+		Image:              "www.ncc.com/precisionfarming/crop/image/000",
+		Cghc:               4,
+		Irrigation:         true,
+		FertilizerAddition: true,
+		ApplyPesticide:     true,
+		Harvesting:         false,
+	}
+
+	fmt.Println(cropJson)
 
 }
