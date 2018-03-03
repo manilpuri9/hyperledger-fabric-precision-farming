@@ -52,8 +52,9 @@ func f1()
 
 func main() {
 	fmt.Println("hello world")
+	var n = "rice"
 	cropJson := Crop{
-		Name:     "rice",
+		Name:     n,
 		Owner:    "manil puri",
 		Quantity: 400,
 		FarmInfo: {
