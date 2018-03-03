@@ -66,6 +66,7 @@ type Crop struct {
 	Harvesting         bool              `json:"harvesting"`
 }
 
+//20 inputs
 func main() {
 	fmt.Println("hello world")
 	crop := Crop{
@@ -106,6 +107,12 @@ func main() {
 				Percentage: 3.4,
 			},
 		},
+		Image:              "www.ncc.com/precisionfarming/crop/image/000",
+		Cghc:               4,
+		Irrigation:         true,
+		FertilizerAddition: true,
+		ApplyPesticide:     true,
+		Harvesting:         false,
 	}
 
 	cropJsonBytes, err := json.Marshal(crop)
