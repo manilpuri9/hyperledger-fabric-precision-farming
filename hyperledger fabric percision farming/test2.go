@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -67,7 +68,7 @@ type Crop struct {
 
 func main() {
 	fmt.Println("hello world")
-	cropJson := Crop{
+	crop := Crop{
 		Name:     "rice",
 		Owner:    "manil puri",
 		Quantity: 400,
@@ -106,5 +107,17 @@ func main() {
 			},
 		},
 	}
+
+	cropJsonBytes, err := json.Marshal(crop)
+	//cropBytes := []byte(cropJson)
+	if err != nil {
+		fmt.Println("error converting go crop type to json format.")
+	}
+	var cropJson Crop
+	err1 := json.Unmarshal(cropJsonBytes, &cropJson)
+	if err1 != nil {
+		fmt.Println("error converting go crop type to json format.")
+	}
 	fmt.Println(cropJson)
+	fmt.Println(crop)
 }
