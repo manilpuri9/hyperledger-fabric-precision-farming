@@ -8,6 +8,7 @@ references:
 
 couch db basic understanding:
 https://medium.com/wearetheledger/hyperledger-fabric-couchdb-fantastic-queries-and-where-to-find-them-f8a3aecef767
+http://docs.couchdb.org/en/2.1.0/api/database/find.html?highlight=find#post--db-_find
 
 
 
