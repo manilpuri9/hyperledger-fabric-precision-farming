@@ -424,3 +424,206 @@ func (t *SimpleChaincode) readCrop(stub shim.ChaincodeStubInterface, args []stri
 
 	return shim.Success(valAsbytes)
 }
+
+// ==================================================
+// delete - remove a crop key/value pair from state
+// ==================================================
+func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var jsonResp string
+	var marbleJSON marble
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+	marbleName := args[0]
+
+	// to maintain the color~name index, we need to read the marble first and get its color
+	valAsbytes, err := stub.GetState(marbleName) //get the marble from chaincode state
+	if err != nil {
+		jsonResp = "{\"Error\":\"Failed to get state for " + marbleName + "\"}"
+		return shim.Error(jsonResp)
+	} else if valAsbytes == nil {
+		jsonResp = "{\"Error\":\"Marble does not exist: " + marbleName + "\"}"
+		return shim.Error(jsonResp)
+	}
+
+	err = json.Unmarshal([]byte(valAsbytes), &marbleJSON)
+	if err != nil {
+		jsonResp = "{\"Error\":\"Failed to decode JSON of: " + marbleName + "\"}"
+		return shim.Error(jsonResp)
+	}
+
+	err = stub.DelState(marbleName) //remove the marble from chaincode state
+	if err != nil {
+		return shim.Error("Failed to delete state:" + err.Error())
+	}
+
+	// maintain the index
+	indexName := "color~name"
+	colorNameIndexKey, err := stub.CreateCompositeKey(indexName, []string{marbleJSON.Color, marbleJSON.Name})
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	//  Delete index entry to state.
+	err = stub.DelState(colorNameIndexKey)
+	if err != nil {
+		return shim.Error("Failed to delete state:" + err.Error())
+	}
+	return shim.Success(nil)
+}
+
+// ===========================================================
+// irrigation
+// ===========================================================
+func (t *SimpleChaincode) transferMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	//   0       1
+	// "name", "bob"
+	if len(args) < 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	marbleName := args[0]
+	newOwner := strings.ToLower(args[1])
+	fmt.Println("- start transferMarble ", marbleName, newOwner)
+
+	marbleAsBytes, err := stub.GetState(marbleName)
+	if err != nil {
+		return shim.Error("Failed to get marble:" + err.Error())
+	} else if marbleAsBytes == nil {
+		return shim.Error("Marble does not exist")
+	}
+
+	marbleToTransfer := marble{}
+	err = json.Unmarshal(marbleAsBytes, &marbleToTransfer) //unmarshal it aka JSON.parse()
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	marbleToTransfer.Owner = newOwner //change the owner
+
+	marbleJSONasBytes, _ := json.Marshal(marbleToTransfer)
+	err = stub.PutState(marbleName, marbleJSONasBytes) //rewrite the marble
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end transferMarble (success)")
+	return shim.Success(nil)
+}
+
+// ===========================================================
+// add fertilizer
+// ===========================================================
+func (t *SimpleChaincode) transferMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	//   0       1
+	// "name", "bob"
+	if len(args) < 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	marbleName := args[0]
+	newOwner := strings.ToLower(args[1])
+	fmt.Println("- start transferMarble ", marbleName, newOwner)
+
+	marbleAsBytes, err := stub.GetState(marbleName)
+	if err != nil {
+		return shim.Error("Failed to get marble:" + err.Error())
+	} else if marbleAsBytes == nil {
+		return shim.Error("Marble does not exist")
+	}
+
+	marbleToTransfer := marble{}
+	err = json.Unmarshal(marbleAsBytes, &marbleToTransfer) //unmarshal it aka JSON.parse()
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	marbleToTransfer.Owner = newOwner //change the owner
+
+	marbleJSONasBytes, _ := json.Marshal(marbleToTransfer)
+	err = stub.PutState(marbleName, marbleJSONasBytes) //rewrite the marble
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end transferMarble (success)")
+	return shim.Success(nil)
+}
+
+// ===========================================================
+// Add pesticide
+// ===========================================================
+func (t *SimpleChaincode) transferMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	//   0       1
+	// "name", "bob"
+	if len(args) < 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	marbleName := args[0]
+	newOwner := strings.ToLower(args[1])
+	fmt.Println("- start transferMarble ", marbleName, newOwner)
+
+	marbleAsBytes, err := stub.GetState(marbleName)
+	if err != nil {
+		return shim.Error("Failed to get marble:" + err.Error())
+	} else if marbleAsBytes == nil {
+		return shim.Error("Marble does not exist")
+	}
+
+	marbleToTransfer := marble{}
+	err = json.Unmarshal(marbleAsBytes, &marbleToTransfer) //unmarshal it aka JSON.parse()
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	marbleToTransfer.Owner = newOwner //change the owner
+
+	marbleJSONasBytes, _ := json.Marshal(marbleToTransfer)
+	err = stub.PutState(marbleName, marbleJSONasBytes) //rewrite the marble
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end transferMarble (success)")
+	return shim.Success(nil)
+}
+
+// ===========================================================
+// Harvesting
+// ===========================================================
+func (t *SimpleChaincode) transferMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	//   0       1
+	// "name", "bob"
+	if len(args) < 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	marbleName := args[0]
+	newOwner := strings.ToLower(args[1])
+	fmt.Println("- start transferMarble ", marbleName, newOwner)
+
+	marbleAsBytes, err := stub.GetState(marbleName)
+	if err != nil {
+		return shim.Error("Failed to get marble:" + err.Error())
+	} else if marbleAsBytes == nil {
+		return shim.Error("Marble does not exist")
+	}
+
+	marbleToTransfer := marble{}
+	err = json.Unmarshal(marbleAsBytes, &marbleToTransfer) //unmarshal it aka JSON.parse()
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	marbleToTransfer.Owner = newOwner //change the owner
+
+	marbleJSONasBytes, _ := json.Marshal(marbleToTransfer)
+	err = stub.PutState(marbleName, marbleJSONasBytes) //rewrite the marble
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end transferMarble (success)")
+	return shim.Success(nil)
+}
