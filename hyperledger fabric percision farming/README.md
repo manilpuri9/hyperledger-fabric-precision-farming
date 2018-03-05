@@ -10,6 +10,8 @@ couch db basic understanding:
 https://medium.com/wearetheledger/hyperledger-fabric-couchdb-fantastic-queries-and-where-to-find-them-f8a3aecef767
 http://docs.couchdb.org/en/2.1.0/api/database/find.html?highlight=find#post--db-_find
 
+parshing json to string online tool:
+https://www.freeformatter.com/javascript-escape.html
 
 
 https://medium.com/wearetheledger/a-first-attempt-at-hyperledger-fabric-kubernetes-66e43b12a211
@@ -58,4 +60,6 @@ https://github.com/hyperledger/education/blob/master/LFS171x/fabric-material/cha
 
 ibm adding a new org in the network
 https://www.ibm.com/developerworks/cloud/library/cl-add-an-organization-to-your-hyperledger-fabric-blockchain/index.html
+
+
 
