@@ -400,3 +400,27 @@ func (t *SimpleChaincode) getHistoryForCrop(stub shim.ChaincodeStubInterface, ar
 
 	return shim.Success(buffer.Bytes())
 }
+
+// ===============================================
+// readCrop - read a Crop from chaincode state
+// ===============================================
+func (t *SimpleChaincode) readCrop(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var name, jsonResp string
+	var err error
+
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting name of the Crop to query")
+	}
+
+	name = args[0]
+	valAsbytes, err := stub.GetState(name) //get the marble from chaincode state
+	if err != nil {
+		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
+		return shim.Error(jsonResp)
+	} else if valAsbytes == nil {
+		jsonResp = "{\"Error\":\"Marble does not exist: " + name + "\"}"
+		return shim.Error(jsonResp)
+	}
+
+	return shim.Success(valAsbytes)
+}
