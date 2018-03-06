@@ -238,11 +238,9 @@ func (t *SimpleChaincode) initCrop(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error(err.Error())
 	}
 
-	//Alternatively, build the marble json string manually if you don't want to use struct marshalling
-	//marbleJSONasString := `{"docType":"Marble",  "name": "` + marbleName + `", "color": "` + color + `", "size": ` + strconv.Itoa(size) + `, "owner": "` + owner + `"}`
-	//marbleJSONasBytes := []byte(str)
+	
 
-	// === Save marble to state ===
+	// === Save crop to state ===
 	err = stub.PutState(cropnamev, cropJsonBytes)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -371,9 +369,7 @@ func (t *SimpleChaincode) updateCrop(stub shim.ChaincodeStubInterface, args []st
 		return shim.Error(err.Error())
 	}
 
-	//Alternatively, build the marble json string manually if you don't want to use struct marshalling
-	//marbleJSONasString := `{"docType":"Marble",  "name": "` + marbleName + `", "color": "` + color + `", "size": ` + strconv.Itoa(size) + `, "owner": "` + owner + `"}`
-	//marbleJSONasBytes := []byte(str)
+	
 
 	// === Save marble to state ===
 	err = stub.PutState(cropnamev, cropJsonBytes)
@@ -489,7 +485,7 @@ func (t *SimpleChaincode) getHistoryForCrop(stub shim.ChaincodeStubInterface, ar
 		buffer.WriteString(", \"Value\":")
 		// if it was a delete operation on given key, then we need to set the
 		//corresponding value null. Else, we will write the response.Value
-		//as-is (as the Value itself a JSON marble)
+		//as-is (as the Value itself a JSON crop)
 		if response.IsDelete {
 			buffer.WriteString("null")
 		} else {
@@ -528,7 +524,7 @@ func (t *SimpleChaincode) readCrop(stub shim.ChaincodeStubInterface, args []stri
 	}
 
 	name = args[0]
-	valAsbytes, err := stub.GetState(name) //get the marble from chaincode state
+	valAsbytes, err := stub.GetState(name) //get the crop from chaincode state
 	if err != nil {
 		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
 		return shim.Error(jsonResp)
@@ -618,7 +614,7 @@ func (t *SimpleChaincode) irrigation(stub shim.ChaincodeStubInterface, args []st
 	cropIrrigation.Irrigation = newIrrigationValue //change the owner
 
 	cropJSONasBytes, _ := json.Marshal(cropIrrigation)
-	err = stub.PutState(cropName, cropJSONasBytes) //rewrite the marble
+	err = stub.PutState(cropName, cropJSONasBytes) //rewrite the crop
 	if err != nil {
 		return shim.Error(err.Error())
 	}
