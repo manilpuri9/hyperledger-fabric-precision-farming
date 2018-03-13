@@ -15,5 +15,30 @@ peer chaincode invoke -n mycc -c '{"Args":["initCrop","rice","manil puri",
 
 
 INVOKE QUERY:
-
 peer chaincode invoke -n mycc -c '{"Args":["queryCrop","rice"]}' -C myc
+
+
+GET HISTORY OF CROP:
+peer chaincode invoke -n mycc -c '{"Args":["historyCrop","rice"]}' -C myc
+
+
+READ CROP:
+peer chaincode invoke -n mycc -c '{"Args":["readCrop","rice"]}' -C myc
+
+DELETE CROP:
+peer chaincode invoke -n mycc -c '{"Args":["deleteCrop","rice"]}' -C myc
+
+START TRANSECTION FOR IRRIGATION:
+peer chaincode invoke -n mycc -c '{"Args":["irrigationCrop","rice","true"]}' -C myc
+
+
+START TRANSECTION FOR FERTILIZATION:
+peer chaincode invoke -n mycc -c '{"Args":["addFertilizerCrop","rice","true"]}' -C myc
+
+
+START TRANSECTION FOR ADDING PESTICIDE:
+peer chaincode invoke -n mycc -c '{"Args":["irrigationCrop","rice","true"]}' -C myc
+
+
+START TRANSECTION FOR HARVESTING:
+peer chaincode invoke -n mycc -c '{"Args":["harvestCrop","rice","true"]}' -C myc
