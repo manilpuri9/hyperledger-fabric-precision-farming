@@ -142,7 +142,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 // ============================================================
-// initMarble - create a new Crop, store into chaincode state
+// initCrop - create a new Crop, store into chaincode state
 // ============================================================
 func (t *SimpleChaincode) initCrop(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
