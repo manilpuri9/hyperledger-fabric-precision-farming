@@ -121,6 +121,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.initCrop(stub, args)
 	} else if function == "queryCrop" { //find Crop based on an ad hoc rich query
 		return t.queryCrop(stub, args)
+	}else if function == "updateCrop" { //update Crop based on an ad hoc rich query
+		return t.updateCrop(stub, args)
 	} else if function == "historyOfCrop" { //find Crop based on an ad hoc rich query
 		return t.getHistoryForCrop(stub, args)
 	} else if function == "readCrop" { //find Crop based on an ad hoc rich query
