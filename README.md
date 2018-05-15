@@ -1,6 +1,23 @@
 
 # Precision Farming
 
+## Application:
+	Health-Smart Secure Farming (HSSF)
+## Target Problem
+### How to achieve “health-smart secure farming” such that the following 3 conditions can be satisfied:
+
+#### Precise monitoring 
+of the crop growing conditions, weather (temperature, humidity, etc.) and soil (moisture, pH, etc.) so that we can learn new “integrated crop growth models”
+
+#### Detecting
+ specific problems related to productive farming, including input/output wastage, pests and diseases, and controlling farming activities such that crops grow healthily.
+
+#### Scalable 
+control and distributed security must be ensured for food safety.
+
+
+
+
 
 ## References:
 
